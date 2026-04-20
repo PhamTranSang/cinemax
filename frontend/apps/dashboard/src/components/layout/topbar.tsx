@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom"
-import { LogOut, Settings } from "lucide-react"
+import { useNavigate } from "react-router-dom";
+import { LogOut, Settings } from "lucide-react";
 import {
   Button,
   Avatar,
@@ -11,27 +11,36 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   Badge,
-} from "@cinemax/ui"
-import { roleLabel } from "@cinemax/shared"
-import { useAuth } from "@/providers/auth-provider"
+} from "@cinemax/ui";
+import { roleLabel } from "@cinemax/shared";
+import { useAuth } from "@/providers/auth-provider";
 
-export function Topbar({ title }: { title: string }) {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
+export function Topbar({ title }: Readonly<{ title: string }>) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await logout()
-    navigate("/login", { replace: true })
-  }
+    await logout();
+    navigate("/login", { replace: true });
+  };
 
-  if (!user) return null
+  if (!user) return null;
 
-  const initials = `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || user.username.slice(0, 2).toUpperCase()
+  const displayName = user.fullName || user.username;
+  const initials =
+    displayName
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("") || user.username.slice(0, 2).toUpperCase();
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-border/60 bg-background/60 px-4 backdrop-blur md:px-6">
       <div className="flex flex-col">
-        <h1 className="font-serif text-lg font-semibold tracking-tight md:text-xl">{title}</h1>
+        <h1 className="font-serif text-lg font-semibold tracking-tight md:text-xl">
+          {title}
+        </h1>
       </div>
 
       <div className="flex items-center gap-3">
@@ -40,22 +49,26 @@ export function Topbar({ title }: { title: string }) {
         </Badge>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-2"
+            >
               <Avatar className="h-7 w-7">
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <span className="hidden text-sm font-medium sm:inline">
-                {user.firstName} {user.lastName}
+                {displayName}
               </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium">
-                  {user.firstName} {user.lastName}
+                <span className="text-sm font-medium">{displayName}</span>
+                <span className="text-xs text-muted-foreground">
+                  {user.email}
                 </span>
-                <span className="text-xs text-muted-foreground">{user.email}</span>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -72,5 +85,5 @@ export function Topbar({ title }: { title: string }) {
         </DropdownMenu>
       </div>
     </header>
-  )
+  );
 }
