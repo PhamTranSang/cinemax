@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Cinema palette: deep red primary, warm off-white bg, amber accent */
+    --background: 40 33% 98%;
+    --foreground: 20 14% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 20 14% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14% 12%;
+
+    --primary: 0 68% 42%;
+    --primary-foreground: 40 33% 98%;
+
+    --secondary: 30 15% 94%;
+    --secondary-foreground: 20 14% 12%;
+
+    --muted: 30 12% 93%;
+    --muted-foreground: 20 10% 40%;
+
+    --accent: 35 85% 55%;
+    --accent-foreground: 20 14% 12%;
+
+    --destructive: 0 75% 45%;
+    --destructive-foreground: 40 33% 98%;
+
+    --border: 20 10% 88%;
+    --input: 20 10% 88%;
+    --ring: 0 68% 42%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 20 14% 8%;
+    --foreground: 40 33% 96%;
+
+    --card: 20 14% 11%;
+    --card-foreground: 40 33% 96%;
+
+    --popover: 20 14% 11%;
+    --popover-foreground: 40 33% 96%;
+
+    --primary: 0 68% 52%;
+    --primary-foreground: 40 33% 98%;
+
+    --secondary: 20 10% 16%;
+    --secondary-foreground: 40 33% 96%;
+
+    --muted: 20 10% 16%;
+    --muted-foreground: 30 10% 65%;
+
+    --accent: 35 85% 55%;
+    --accent-foreground: 20 14% 12%;
+
+    --destructive: 0 70% 48%;
+    --destructive-foreground: 40 33% 98%;
+
+    --border: 20 10% 20%;
+    --input: 20 10% 20%;
+    --ring: 0 68% 52%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}

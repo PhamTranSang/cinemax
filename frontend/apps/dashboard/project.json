@@ -1,0 +1,29 @@
+{
+  "name": "dashboard",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/dashboard/src",
+  "projectType": "application",
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/dashboard",
+        "command": "vite --host 0.0.0.0 --port 4200"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/dashboard",
+        "command": "vite build"
+      }
+    },
+    "preview": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/dashboard",
+        "command": "vite preview --host 0.0.0.0 --port 4300"
+      }
+    }
+  }
+}
