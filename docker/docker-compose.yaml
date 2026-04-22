@@ -1,0 +1,44 @@
+services:
+  cinemax-db:
+    image: postgres:16-alpine
+    container_name: cinemax-db
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/postgres_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_user
+      - postgres_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init-database.sql:/docker-entrypoint-initdb.d/init-database.sql
+
+  cinemax-backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: cinemax-backend
+    depends_on:
+      - cinemax-db
+    environment:
+      SPRING_CONFIG_ADDITIONAL_LOCATION: optional:file:/app/configs/
+      SPRING_CONFIG_IMPORT: optional:configtree:/run/secrets/
+    secrets:
+      - source: postgres_user
+        target: spring.datasource.username
+      - source: postgres_password
+        target: spring.datasource.password
+    volumes:
+      - ./configs/backend:/app/configs:ro
+    ports:
+      - "8080:8080"
+
+volumes:
+  db_data:
+
+secrets:
+  postgres_user:
+    file: ./secrets/db/postgres_user.txt
+  postgres_password:
+    file: ./secrets/db/postgres_password.txt
