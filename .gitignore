@@ -4,8 +4,4 @@
 
 .idea/
 
-libs/
-
-db/
-
 docker/secrets/
