@@ -6,11 +6,9 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 BACKEND_DIR="${REPO_ROOT}/backend"
 EXTERNAL_CONFIG_DIR="${SCRIPT_DIR}/configs"
-LIB_DIR="${SCRIPT_DIR}/libs"
-JAVA_HOME_LINK="${LIB_DIR}/java"
 
 DEBUG="${DEBUG:-true}"
-DEBUG_PORT="${DEBUG_PORT:-5005}"
+DEBUG_PORT="${DEBUG_PORT:-7080}"
 DEBUG_SUSPEND="${DEBUG_SUSPEND:-n}"
 
 echo "Running Spring Boot with external config..."
