@@ -5,7 +5,7 @@ server:
 
 spring:
   application:
-    name: cinemax
+    name: cinemax-application
   datasource:
     driver-class-name: org.postgresql.Driver
   jpa:
@@ -13,4 +13,5 @@ spring:
       ddl-auto: validate
   liquibase:
     change-log: classpath:db/db.changelog-master.xml
+    default-schema: cinemax
     enabled: true

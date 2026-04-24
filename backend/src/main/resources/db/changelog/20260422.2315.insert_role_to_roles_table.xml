@@ -1,0 +1,28 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="20260422.2315.insert_role_to_role_table" author="stran">
+        <insert tableName="t_roles">
+            <column name="role_id" value="b4e669d3-1b74-49ed-82bc-d34583477b68" />
+            <column name="role_name" value="SUPER_ADMIN"/>
+            <column name="description" value="SUPER_ADMIN: Full system access, including user, role, and platform configuration management."/>
+        </insert>
+        <insert tableName="t_roles">
+            <column name="role_id" value="c5f779e4-2c85-50fe-93cd-e45694588c79"/>
+            <column name="role_name" value="CINEMA_MANAGER"/>
+            <column name="description" value="CINEMA_MANAGER: Manage cinema operations, including scheduling, staff, and customer interactions."/>
+        </insert>
+        <insert tableName="t_roles">
+            <column name="role_id" value="d6888af5-3d96-41af-a4de-f567a5699d8a"/>
+            <column name="role_name" value="STAFF"/>
+            <column name="description" value="STAFF: Manage daily operations and assist customers."/>
+        </insert>
+        <insert tableName="t_roles">
+            <column name="role_id" value="e7999ab6-4e07-42ab-b5ef-a678b67a0e9b"/>
+            <column name="role_name" value="CUSTOMER"/>
+            <column name="description" value="CUSTOMER: Access and use cinema services."/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

@@ -4,4 +4,6 @@
     xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
     http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
+    <include file="db/changelog/20260422.2300.init_authentication_tables.xml" author="stran"/>
+    <include file="db/changelog/20260422.2315.insert_role_to_roles_table.xml" author="stran"/>
 </databaseChangeLog>
