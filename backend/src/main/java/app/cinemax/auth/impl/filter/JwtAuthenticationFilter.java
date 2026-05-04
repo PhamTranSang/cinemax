@@ -1,6 +1,7 @@
 package app.cinemax.auth.impl.filter;
 
 import app.cinemax.auth.impl.service.JwtService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,12 +33,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final var token = authHeader.substring(7);
 
-        if (jwtService.isValid(token)) {
+        try {
             final var username = jwtService.extractUsername(token);
+
+            if (username == null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                return;
+            }
+
             final var user = userDetailsService.loadUserByUsername(username);
-            final var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            if (jwtService.isTokenValid(token, user)) {
+                // TODO: Adding check blacklist
+                final var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        } catch (final JwtException e) {
+            throw new JwtException("" + e.getMessage());
         }
+
         filterChain.doFilter(request, response);
     }
 }

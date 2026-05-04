@@ -19,6 +19,7 @@ import app.cinemax.auth.impl.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -43,14 +44,14 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public SignupResponse signup(final SignupRequest request) {
         userRepository.findByUsername(request.username())
-                .ifPresent(u -> {
-                    throw new ConflictException("Username already existed");
-                });
+            .ifPresent(u -> {
+                throw new ConflictException("Username already existed");
+            });
 
         userRepository.findByEmail(request.email())
-                .ifPresent(u -> {
-                    throw new ConflictException("Email already existed");
-                });
+            .ifPresent(u -> {
+                throw new ConflictException("Email already existed");
+            });
 
         try {
             final var user = userMapper.toEntity(request);
@@ -74,20 +75,25 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public SigninTokens signin(final SigninRequest request) {
-        final var token = new UsernamePasswordAuthenticationToken(request.username(), request.password());
-        final var authentication = authenticationManager.authenticate(token);
+        try {
+            final var token = new UsernamePasswordAuthenticationToken(request.username(), request.password());
+            final var authentication = authenticationManager.authenticate(token);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        final var user = (UserDetails) authentication.getPrincipal();
-        final var accessToken = jwtService.generateAccessToken(user);
-        final var refreshToken = jwtService.generateRefreshToken(user);
+            final var user = (UserDetails) authentication.getPrincipal();
+            final var accessToken = jwtService.generateAccessToken(user);
+            final var refreshToken = jwtService.generateRefreshToken(user);
 
-        return new SigninTokens(accessToken, refreshToken);
+            return new SigninTokens(accessToken, refreshToken);
+        } catch(final BadCredentialsException e) {
+            throw new BadCredentialsException("Invalid credentials" + e.getMessage());
+        }
     }
 
     @Override
     public MessageResponse logout() {
+        // TODO: adding token to blacklist
         SecurityContextHolder.clearContext();
 
         return new MessageResponse("User logged out successfully");
