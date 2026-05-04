@@ -1,5 +1,6 @@
 package app.cinemax.auth.impl.config;
 
+import app.cinemax.auth.api.dto.constants.AuthConstants;
 import app.cinemax.auth.impl.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -38,31 +39,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(final HttpSecurity http) {
         return http
-                .headers(headers -> headers
-                        .contentSecurityPolicy(csp -> csp
-                                .policyDirectives(
-                                        "default-src 'self'; " +
-                                                "script-src 'self'; " +
-                                                "style-src 'self' 'unsafe-inline'; "
-                                                +
-                                                "img-src 'self' data:; "
-                                                +
-                                                "font-src 'self' data:; "
-                                                +
-                                                "connect-src 'self'; " +
-                                                "object-src 'none'; " +
-                                                "frame-ancestors 'none';")))
-                .cors(cors -> cors.configurationSource(corsConfigurationSource))
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .anyRequest().authenticated())
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+            .headers(headers -> headers
+                .contentSecurityPolicy(csp -> csp.policyDirectives(AuthConstants.CSP_RULE))
+                .frameOptions(frame -> frame.deny())
+            )
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
+            .csrf(csrf -> csrf.spa())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .anyRequest().authenticated())
+            .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+            .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+            .build();
     }
 }

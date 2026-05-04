@@ -2,11 +2,17 @@ package app.cinemax.auth.impl.controller;
 
 import app.cinemax.auth.api.dto.request.SigninRequest;
 import app.cinemax.auth.api.dto.request.SignupRequest;
+import app.cinemax.auth.api.dto.request.TokenRefreshRequest;
 import app.cinemax.auth.api.dto.response.MessageResponse;
 import app.cinemax.auth.api.dto.response.SigninResponse;
 import app.cinemax.auth.api.dto.response.SignupResponse;
+import app.cinemax.auth.api.dto.response.TokenRefreshResponse;
 import app.cinemax.auth.api.exceptions.ConflictException;
+import app.cinemax.auth.api.exceptions.TokenRefreshException;
 import app.cinemax.auth.api.service.AuthService;
+import app.cinemax.auth.impl.service.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,7 +26,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +45,8 @@ public class AuthController {
     private static final String REFRESH_TOKEN_COOKIE = "refreshToken";
 
     private final AuthService authService;
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
 
     @PostMapping("/signup")
     @Operation(summary = "Sign up a new user", description = "Create a new user account and assign default CUSTOMER role")
@@ -71,10 +82,10 @@ public class AuthController {
 
     private ResponseCookie createRefreshTokenCookie(final String refreshToken) {
         return ResponseCookie.from(REFRESH_TOKEN_COOKIE, refreshToken)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .sameSite("Strict")
+                .httpOnly(true) // can not be accessed via JavaScript.
+                .secure(true) // Only send over HTTPS
+                .path("/auth/token")
+                .sameSite("Lax") // prevents CSRF in most cases
                 .maxAge(MAX_AGE_SECONDS)
                 .build();
     }
@@ -90,12 +101,39 @@ public class AuthController {
         final var deleteCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE)
                 .httpOnly(true)
                 .secure(true)
-                .path("/")
-                .sameSite("Strict")
+                .path("/auth/token")
+                .sameSite("Lax")
                 .maxAge(0)
                 .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
                 .body(response);
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "Refresh Token", description = "Refresh token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TokenRefreshResponse.class))),
+            @ApiResponse(responseCode = "401", description = "", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TokenRefreshException.class))),
+            @ApiResponse(responseCode = "500", description = "", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = String.class)))
+    })
+    public ResponseEntity<TokenRefreshResponse> refresh(@Valid @RequestBody final TokenRefreshRequest request) {
+        final var refreshToken = request.refreshToken();
+
+        try {
+            final var userName = jwtService.extractUsername(refreshToken);
+            final var userDetails = userDetailsService.loadUserByUsername(userName);
+            final var newAccessToken = jwtService.generateAccessToken(userDetails);
+            return ResponseEntity.ok(new TokenRefreshResponse(newAccessToken, refreshToken));
+        } catch (final ExpiredJwtException e) {
+            throw new TokenRefreshException("Refresh token is expired, please log in agains");
+        } catch (final JwtException e) {
+            throw new TokenRefreshException("Refresh token is invalid");
+        }
+    }
+
+    @GetMapping("/csrf")
+    public CsrfToken getCsrfToken(final CsrfToken token) {
+        return token;
     }
 }
